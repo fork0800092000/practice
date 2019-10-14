@@ -14,8 +14,8 @@ train_data = data[:, :2]
 label_data = data[:, 2]
 
 class perceptron(object):
-    def __init__(self, w, b = 1, lr = 0.1, epoch = 1):
-        self.w = np.random.rand(len(train_data[0]))
+    def __init__(self, w, b = 1, lr = 1000, epoch = 1):
+        self.w = np.array([0,0])
         self.b = b
         self.lr = lr
         self.epoch = epoch
@@ -28,12 +28,12 @@ class perceptron(object):
         return activation
     def fit(self, training_inputs, labels):
         for i in range(self.epoch):
-            for inputs, labels in zip(training_inputs, labels):
+            for inputs, label in zip(training_inputs, labels):
                 prediction = self.predict(inputs)
-                if (labels != prediction)&(labels==1) :
+                if (label != prediction)&(label==1) :
                     self.w = self.w + self.lr * inputs 
                     self.b = self.b - self.lr * 1
-                elif (labels != prediction)&(labels==0):
+                elif (label != prediction)&(label==0):
                     self.w = self.w - self.lr * inputs
                     self.b = self.b + self.lr * 1
                 else:
@@ -43,13 +43,13 @@ p = perceptron(1)
 p.fit(train_data,label_data)
 x_list = train_data[:,0]
 y_list = train_data[:,1]
+plt.figure('Scatter fig')
 ax = plt.gca()
-plt.figure('Scatter map')
 ax.set_xlabel('x')
 ax.set_ylabel('y')
 x = np.linspace(-1,1,10)
 y = (-p.b-p.w[0]*x)/p.w[1]
-plt.plot(x,y)
+ax.plot(x,y)
 '''def funtion(x1,x2):
     return p.w[0]*x1 + p.w[1]*x2 + 1
 x = np.arange(-1,1,1)
