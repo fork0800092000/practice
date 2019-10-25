@@ -14,8 +14,27 @@ from math import exp
 
 
 data = np.genfromtxt('perceptron1.txt',delimiter = '')
+
 train = data[:,:2]
-label = data[:,2]
+train_max = np.max(train, axis = 0)
+train_min = np.min(train, axis = 0)
+for j in range(train.shape[1]):
+    for i in range(len(train)):
+        train[i][j] = (train[i][j] - train_min[j]) / (train_max[j] - train_min[j])
+        
+'''label = data[:,2]
+for i in range(len(label)):
+    if label[i] == 1:
+        label[i] = 0
+    else:
+        label[i] = 1
+label_max = np.max(label, axis = 0)
+label_min = np.min(label, axis = 0)
+for i in range(len(label)):
+        label[i] = (label[i] - label_min) / (label_max - label_min)'''
+
+
+
 train_c = np.concatenate((-(np.ones(shape = (train.shape[0],1))),train),axis = 1).astype(float)
 train_set = train_c[:int(2/3*train_c.shape[0]),:]
 train_label = label[:int(2/3*label.shape[0]),]
@@ -99,21 +118,20 @@ def train_network(network, epoch, l_rate, train, label):
             sum_error += sum([(expected-realout)**2])            
             backward_propagation(network,expected)
             update_weight(network, l_rate, row)
-        print('>epoch = %d, l_rate = %.3f, error = %.3f\n'%(ep, l_rate, sum_error))
+        print('>epoch = %d, l_rate = %.3f, Mean Squared Error = %.3f\n'%(ep, l_rate, sum_error/len(train)))
 
-train_network(network, 20, 0.5, train_set, train_label)
+train_network(network, 20, 0.01, train_set, train_label)
 for layer in network:
     print(layer)    
 
 def predict(network, row):
     output = forward_propagation(network, row)
-    return (output)   
+    return output   
 print('\n')
-for row in train_set:
-    i = 0 
-    prediction = predict(network, row)
-    print('Expected = %d, Got = %d'%(train_label[i], prediction))
-    i += 1
+for i in range(len(train_set)):
+    out = forward_propagation(network, train_set[i])
+    print('Expected = %d, Got = %f'%(train_label[i], out))
+
 
 def accuracy(predict, actual):
     correct = 0
