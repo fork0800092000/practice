@@ -12,6 +12,7 @@ from random import seed
 from math import exp
 
 
+
 data = np.genfromtxt('perceptron1.txt',delimiter = '')
 train = data[:,:2]
 label = data[:,2]
@@ -33,14 +34,13 @@ seed(1)
 network = initialize_network(2,2,1)
 for layer in network:
     print(layer)
-    for neuron in layer:
-        print(neuron)
-    
-def activation(weights:list, inputs:list):
-    sum = 0
+
+   
+def activation(weights, inputss):
+    mul = 0
     for i in range(len(weights)):
-        sum += weights[i] * inputs[i]
-    return sum
+        mul += weights[i] * inputss[i]
+    return mul
 
 def sigmoid(activation):
     return 1.0 / (1.0 + exp(-activation))
@@ -53,15 +53,9 @@ def forward_propagation(network,row):
             activate = activation(neuron['weights'], inputs)
             neuron['output'] = sigmoid(activate)
             new_inputs.append(neuron['output'])
+        new_inputs.insert(0, (-1))
         inputs = new_inputs
-    return inputs
-
-row = [1, 0, 0]
-forward_propagation(network, row)
-'''Output = []
-for i in range(train_set.shape[0]):
-    Output.append(forward_propagation(network,train_set[i]))
-print(Output)
+    return inputs[1]
 
 def sigmoid_derivative(output):
     return output * (1.0 - output)
@@ -79,40 +73,66 @@ def backward_propagation(network, expected):
         else:
             for j in range(len(layer)):
                 neuron = layer[j]
-                errors.append(expected[j] - neuron['output'])
+                errors.append(expected - neuron['output'])
         for j in range(len(layer)):
             neuron = layer[j]
             neuron['delta'] = errors[j] * sigmoid_derivative(neuron['output'])
-    
-expected = train_label   
-backward_propagation(network, expected)
-for layer in network:
-    print(layer)   
-    
+       
+   
 def update_weight(network, l_rate, inputs):
     for i in range(len(network)):
         bias = inputs[0:]
         if i != 0:
             inputs = [neuron['output'] for neuron in network[i - 1]]
         for neuron in network[i]:
-            for j in range(len(inputs)):
-                if j == 0:
-                    continue
+            for j in range(1,len(inputs)):
                 neuron['weights'][j] += l_rate * neuron['delta'] * inputs[j]
-            neuron['weight'][0] += l_rate * neuron['delta']
+            neuron['weights'][0] += l_rate * neuron['delta']
         
 def train_network(network, epoch, l_rate, train, label):
-    for i in range(epoch):
+    for ep in range(epoch):
         sum_error = 0
-        for row in train:
+        for i in range(len(train)):
+            row = train[i]
+            expected = label[i]
             realout = forward_propagation(network,row)
-            expected = label
-            sum_error += sum([(expected[i] - realout[i])**2  for i in range(len(expected))])
+            sum_error += sum([(expected-realout)**2])            
             backward_propagation(network,expected)
             update_weight(network, l_rate, row)
-        print('>epoch = %d, l_rate = %.3f, error = %.3f', (epoch, l_rate, sum_error))
+        print('>epoch = %d, l_rate = %.3f, error = %.3f\n'%(ep, l_rate, sum_error))
 
-train_network(network, 10, 0.5, train_set, train_label)
+train_network(network, 20, 0.5, train_set, train_label)
 for layer in network:
-    print(layer)        
-'''
+    print(layer)    
+
+def predict(network, row):
+    output = forward_propagation(network, row)
+    return (output)   
+print('\n')
+for row in train_set:
+    i = 0 
+    prediction = predict(network, row)
+    print('Expected = %d, Got = %d'%(train_label[i], prediction))
+    i += 1
+
+def accuracy(predict, actual):
+    correct = 0
+    for i in range(len(preidct)):
+        if predict[i] == actual[i]:
+            correct += 1
+    return correct/float(len(predict)) * 100.0
+
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
