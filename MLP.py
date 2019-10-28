@@ -58,8 +58,8 @@ def forward_propagate(network, row):
 			neuron['output'] = transfer(activation)
 			new_inputs.append(neuron['output'])
 		inputs = new_inputs
+	'print(inputs)'
 	return inputs
-
 # Calculate the derivative of an neuron output
 def transfer_derivative(output):
 	return output * (1.0 - output)
@@ -105,22 +105,24 @@ def train_network(network, train, l_rate, n_epoch, n_outputs):
 			sum_error += sum([(expected[i]-outputs[i])**2 for i in range(len(expected))])
 			backward_propagate_error(network, expected)
 			update_weights(network, row, l_rate)
-		print('>epoch=%d, lrate=%.3f, error=%.3f' % (epoch, l_rate, sum_error))
+		''''print('>epoch=%d, lrate=%.3f, error=%.3f' % (epoch, l_rate, sum_error))'''
 
 def evaluate_algorithm(dataset, algorithm, *args):
     train_set, test_set = split(dataset)
-    predicted, network = algorithm(train_set, test_set, *args)
+    predicted, network = algorithm(dataset, train_set, test_set, *args)
     actual = [row[-1] for row in test_set]
-    print(list(zip(actual, predicted)))
+    'print(list(zip(actual, predicted)))'
     accuracy = accuracy_metric(actual, predicted)
     scores = list()
     scores.append(accuracy)
     return scores, predicted, network
 
-def back_propagation(train, test, l_rate, n_epoch, n_hidden):
+def back_propagation(datset, train, test, l_rate, n_epoch, n_hidden):
 	n_inputs = len(train[0]) - 1
-	n_outputs = len(set([row[-1] for row in train]))
+	n_outputs = len(set([row[-1] for row in datset]))
+	print(n_outputs)
 	network = initialize_network(n_inputs, n_hidden, n_outputs)
+	print(network)
 	train_network(network, train, l_rate, n_epoch, n_outputs)
 	predictions = list()
 	for row in test:
@@ -131,7 +133,7 @@ def back_propagation(train, test, l_rate, n_epoch, n_hidden):
 
 def predict(network, row):
     output = forward_propagate(network, row)
-    print(output)
+    print (output)
     return output.index(max(output))
 
 def accuracy_metric(actual, predicted):
