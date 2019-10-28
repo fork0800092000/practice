@@ -7,48 +7,33 @@ Created on Mon Oct 21 20:05:20 2019
 
 import numpy as np
 import matplotlib.pyplot as plt
-from random import random
+from random import random,sample
 from random import seed
 from math import exp
+import random
+
+def normalize_data(data_norm):
+    data_max = np.max(data_norm, axis = 0)
+    data_min = np.min(data_norm, axis = 0)
+    datac = np.empty(shape = (data_norm.shape[0],data_norm.shape[1]), dtype = float)
+    for j in range(data_norm.shape[1] - 1):
+        for i in range(len(data_norm)):
+            data_norm[i][j] = (data_norm[i][j] - data_min[j]) / (data_max[j] - data_min[j])
+    return data_norm
+
+def split(data):
+    r = random.sample(range(len(data)), int(2/3 * data.shape[0]))
+    s = random.sample(range(len(data)), int(1/3 * data.shape[0]))
+    train_data = data[:int(2/3 * data.shape[0]),:]
+    test_data = data[int(1/3 * data.shape[0]):,:]
+    return train_data, test_data
 
 
-
-data = np.genfromtxt('perceptron1.txt',delimiter = '')
-
-
-'''
-traindata = data[:,:2]
-train_max = np.max(traindata, axis = 0)
-train_min = np.min(traindata, axis = 0)
-for j in range(traindata.shape[1]):
-    for i in range(len(traindata)):
-        traindata[i][j] = (traindata[i][j] - train_min[j]) / (train_max[j] - train_min[j])
-   
-label = data[:,2]
-
-for i in range(len(label)):
-    if label[i] == 1:
-        label[i] = 0
-    else:
-        label[i] = 1
-
-label_max = np.max(label, axis = 0)
-label_min = np.min(label, axis = 0)
-for i in range(len(label)):
-        label[i] = (label[i] - label_min) / (label_max - label_min)
-
-
-
-train_c = np.concatenate((-(np.ones(shape = (train.shape[0],1))),train),axis = 1).astype(float)
-train_set = train_c[:int(2/3*train_c.shape[0]),:]
-train_label = label[:int(2/3*label.shape[0]),]
-test_set = train_c[int(2/3*train_c.shape[0]):,:]
-'''
 def initialize_network(n_inputs, n_hidden, n_outputs):
 	network = list()
-	hidden_layer = [{'weights':[random() for i in range(n_inputs + 1)]} for i in range(n_hidden)]
+	hidden_layer = [{'weights':[random.random() for i in range(n_inputs + 1)]} for i in range(n_hidden)]
 	network.append(hidden_layer)
-	output_layer = [{'weights':[random() for i in range(n_hidden + 1)]} for i in range(n_outputs)]
+	output_layer = [{'weights':[random.random() for i in range(n_hidden + 1)]} for i in range(n_outputs)]
 	network.append(output_layer)
 	return network
 
@@ -122,39 +107,32 @@ def train_network(network, train, l_rate, n_epoch, n_outputs):
 			update_weights(network, row, l_rate)
 		print('>epoch=%d, lrate=%.3f, error=%.3f' % (epoch, l_rate, sum_error))
 
-seed(1)
-n_inputs = len(data[0]) - 1
-n_outputs = len(set(row[-1] for row in data))
-network = initialize_network(n_inputs,2,n_outputs)
-for layer in network:
-    print(layer)
-print('\n',data)
-train_network(network, data, 0.4, 20, n_outputs)
-for layer in network:
-    print(layer)
-  
-    
-def evaluate_algorithm(dataset, algorithm, n_folds, *args):
-	folds = cross_validation_split(dataset, n_folds)
-	scores = list()
-	for fold in folds:
-		train_set = list(folds)
-		train_set.remove(fold)
-		train_set = sum(train_set, [])
-		test_set = list()
-		for row in fold:
-			row_copy = list(row)
-			test_set.append(row_copy)
-			row_copy[-1] = None
-		predicted = algorithm(train_set, test_set, *args)
-		actual = [row[-1] for row in fold]
-		accuracy = accuracy_metric(actual, predicted)
-		scores.append(accuracy)
-	return scores   
+def evaluate_algorithm(dataset, algorithm, *args):
+    train_set, test_set = split(dataset)
+    predicted, network = algorithm(train_set, test_set, *args)
+    actual = [row[-1] for row in test_set]
+    print(list(zip(actual, predicted)))
+    accuracy = accuracy_metric(actual, predicted)
+    scores = list()
+    scores.append(accuracy)
+    return scores, predicted, network
+
+def back_propagation(train, test, l_rate, n_epoch, n_hidden):
+	n_inputs = len(train[0]) - 1
+	n_outputs = len(set([row[-1] for row in train]))
+	network = initialize_network(n_inputs, n_hidden, n_outputs)
+	train_network(network, train, l_rate, n_epoch, n_outputs)
+	predictions = list()
+	for row in test:
+		prediction = predict(network, row)
+		'print(prediction,end = '')'
+		predictions.append(prediction)
+	return predictions, network
 
 def predict(network, row):
     output = forward_propagate(network, row)
-    return output.index(max(output))   
+    print(output)
+    return output.index(max(output))
 
 def accuracy_metric(actual, predicted):
 	correct = 0
@@ -163,23 +141,50 @@ def accuracy_metric(actual, predicted):
 			correct += 1
 	return correct / float(len(actual)) * 100.0
 
-for row in data:
-    prediction = predict(network, row)
-    print('Expected = %d, Got = %d' % (row[-1], prediction))
-    
+def change_label(dataset):
+    category = range(len(set(row[-1] for row in dataset)))
+    label = list()
+    for row in dataset:
+        if row[-1] not in label:
+            label.append(row[-1])
+    for i in range(len(label)):
+        for row in dataset:
+            if row[-1] == label[i]:
+                row[-1] = category[i]
+
+seed(1)
+data = np.genfromtxt('2Circle2.txt',delimiter = '')
+change_label(data)
+normalize_data(data)
+l_rate = 0.3
+n_epoch = 100
+n_hidden = 5
+scores, predicted, network = evaluate_algorithm(data, back_propagation, l_rate, n_epoch, n_hidden)
+print('Scores: %s' % scores)
+print('Mean Accuraccy: %.3f%%\n'%(sum(scores)/float(len(scores))))
+for i in range(len(network)):
+    print('layer%d'%i)
+    for j in range(len(network[i])):
+        print(network[i][j]['weights'])
 
 
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+data_un = np.genfromtxt('2Circle2.txt',delimiter = '')
+change_label(data_un)
+train, test = split(data_un)
+for i in range(len(test)):
+    if predicted[i] == 0:
+        X = test[i][0]
+        Y = test[i][1]
+        plt.scatter(X, Y, c = 'blue')
+    elif predicted[i] == 1:
+        X = test[i][0]
+        Y = test[i][1]
+        plt.scatter(X, Y, c = 'red')
+    else:
+        X = test[i][0]
+        Y = test[i][1]
+        plt.scatter(X, Y, c = 'green')
+plt.show()
+
+
