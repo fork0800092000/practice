@@ -1,9 +1,12 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Oct 21 20:05:20 2019
+Created on Tue Oct 22 23:28:35 2019
 
-@author: aaa
+@author: chenxuezhi
 """
+
+
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,6 +35,10 @@ def split(data):
 def initialize_network(n_inputs, n_hidden, n_outputs):
 	network = list()
 	hidden_layer = [{'weights':[random.random() for i in range(n_inputs + 1)]} for i in range(n_hidden)]
+	network.append(hidden_layer)
+	hidden_layer = [{'weights':[random.random() for i in range(n_hidden + 1)]} for i in range(n_hidden)]
+	network.append(hidden_layer)
+	hidden_layer = [{'weights':[random.random() for i in range(n_hidden + 1)]} for i in range(n_hidden)]
 	network.append(hidden_layer)
 	output_layer = [{'weights':[random.random() for i in range(n_hidden + 1)]} for i in range(n_outputs)]
 	network.append(output_layer)
@@ -154,11 +161,11 @@ def change_label(dataset):
             if row[-1] == label[i]:
                 row[-1] = category[i]
 
-seed(1)
+seed(2)
 data = np.genfromtxt('2Circle2.txt',delimiter = '')
 change_label(data)
 normalize_data(data)
-l_rate = 0.3
+l_rate = 0.5
 n_epoch = 100
 n_hidden = 5
 scores, predicted, network = evaluate_algorithm(data, back_propagation, l_rate, n_epoch, n_hidden)
@@ -168,7 +175,7 @@ for i in range(len(network)):
     print('layer%d'%i)
     for j in range(len(network[i])):
         print(network[i][j]['weights'])
-
+'print(predicted)'
 
 
 data_un = np.genfromtxt('2Circle2.txt',delimiter = '')
@@ -188,5 +195,8 @@ for i in range(len(test)):
         Y = test[i][1]
         plt.scatter(X, Y, c = 'green')
 plt.show()
-
+            
+            
+            
+            
 
