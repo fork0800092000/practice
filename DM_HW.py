@@ -81,7 +81,7 @@ def updateHeader(nodeToTest, targetNode):   #this version does not use recursion
 
 data = loadData()
 initset = createInitSet(data)
-a,c = createTree(initset,40)
+a,c = createTree(initset,50)
 a.disp()
 
 def ascendTree(leafNode, prefixPath): #ascends from leaf node to root
@@ -99,5 +99,28 @@ def findPrefixPath(basePat, treeNode): #treeNode comes from header table
         treeNode = treeNode.nodeLink
     return condPats
 
-print()
-print(findPrefixPath('89', c['89'][1]))
+
+print(findPrefixPath('7', c['7'][1]))
+
+def mineTree(inTree, headerTable, minSup, preFix, freqItemList):
+    bigL = [v[0] for v in sorted(headerTable.items(), key = lambda p: p[0])]
+    print(bigL)
+    for basePat in bigL:
+        newFreqSet = preFix.copy()
+        newFreqSet.add(basePat)
+        freqItemList.append(newFreqSet)
+        condPattBases = findPrefixPath(basePat, headerTable[basePat][1])
+        myCondTree, myHead = createTree(condPattBases, minSup)
+
+        if myHead != None:
+            #print('conditional tree for:',newFreqSet)
+            #myCondTree.disp()
+
+
+            mineTree(myCondTree, myHead,minSup,newFreqSet,freqItemList)
+
+
+
+freqItems = []
+mineTree(a,c,50,set([]),freqItems)
+#print(freqItems,len(freqItems))
