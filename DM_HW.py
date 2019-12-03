@@ -79,10 +79,8 @@ def updateHeader(nodeToTest, targetNode):   #this version does not use recursion
         nodeToTest = nodeToTest.nodeLink
     nodeToTest.nodeLink = targetNode
 
-data = loadData()
-initset = createInitSet(data)
-a,c = createTree(initset,50)
-a.disp()
+
+#a.disp()
 
 def ascendTree(leafNode, prefixPath): #ascends from leaf node to root
     if leafNode.parent != None:
@@ -99,12 +97,8 @@ def findPrefixPath(basePat, treeNode): #treeNode comes from header table
         treeNode = treeNode.nodeLink
     return condPats
 
-
-print(findPrefixPath('7', c['7'][1]))
-
 def mineTree(inTree, headerTable, minSup, preFix, freqItemList):
     bigL = [v[0] for v in sorted(headerTable.items(), key = lambda p: p[0])]
-    print(bigL)
     for basePat in bigL:
         newFreqSet = preFix.copy()
         newFreqSet.add(basePat)
@@ -119,8 +113,16 @@ def mineTree(inTree, headerTable, minSup, preFix, freqItemList):
 
             mineTree(myCondTree, myHead,minSup,newFreqSet,freqItemList)
 
-
-
+data = loadData()
+initset = createInitSet(data)
+minSup = int(input('請輸入minSup : '))
+a,c = createTree(initset,minSup)
 freqItems = []
-mineTree(a,c,50,set([]),freqItems)
-#print(freqItems,len(freqItems))
+mineTree(a,c,minSup,set([]),freqItems)
+print(freqItems,'\n以上為滿足出現{}次的pattern'.format(minSup))
+pattern = set(input('請輸入欲搜尋之frequent pattern:'))
+
+
+
+
+
