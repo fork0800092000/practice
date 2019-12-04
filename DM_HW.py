@@ -98,7 +98,7 @@ def findPrefixPath(basePat, treeNode): #treeNode comes from header table
     return condPats
 
 def mineTree(inTree, headerTable, minSup, preFix, freqItemList):
-    bigL = [v[0] for v in sorted(headerTable.items(), key = lambda p: p[0])]
+    bigL = [v[0] for v in sorted(headerTable.items(), key = lambda p: str(p[1]))]
     for basePat in bigL:
         newFreqSet = preFix.copy()
         newFreqSet.add(basePat)
@@ -115,12 +115,42 @@ def mineTree(inTree, headerTable, minSup, preFix, freqItemList):
 
 data = loadData()
 initset = createInitSet(data)
-minSup = int(input('請輸入minSup : '))
-a,c = createTree(initset,minSup)
-freqItems = []
-mineTree(a,c,minSup,set([]),freqItems)
-print(freqItems,'\n以上為滿足出現{}次的pattern'.format(minSup))
-pattern = set(input('請輸入欲搜尋之frequent pattern:'))
+
+
+while True:
+    minSup = int(input('請輸入minSup (小於60): '))
+    a,c = createTree(initset,minSup)
+    freqItems = []
+    mineTree(a,c,minSup,set([]),freqItems)
+    #print(freqItems,'\n以上為滿足出現{}次的frequent pattern'.format(minSup))
+
+
+    pattern = input('請輸入欲搜尋之pattern(請以空白作為間隔):').split()
+    mySet = set(pattern)
+    if mySet in freqItems:
+        for index in range(len(data)):
+            tf = []
+            for i in pattern:
+                if i in data[index]:
+                    tf.append(True)
+                else:
+                    tf.append(False)
+            #print(tf)
+            flag = True
+            for l in tf:
+                if l == True:
+                    continue
+                else:
+                    flag = False
+            if flag == True:
+                print(index+1)
+    else:
+        print('\n搜尋的字串並不符合Frequent Pattern之條件')
+
+
+
+
+
 
 
 
