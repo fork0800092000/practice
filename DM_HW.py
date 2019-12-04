@@ -1,8 +1,9 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Dec  1 13:34:11 2019
+Created on Wed Dec  4 21:26:30 2019
 
-@author: aaa
+@author: chenxuezhi
 """
 
 def loadData():
@@ -118,7 +119,13 @@ initset = createInitSet(data)
 
 
 while True:
-    minSup = int(input('請輸入minSup (小於60): '))
+    scanner = input('請輸入minSup (exit離開程式): ')
+    if scanner == 'exit':
+        break
+    elif int(scanner) >= 59:
+        minSup = 59
+    else:
+        minSup = int(scanner)
     a,c = createTree(initset,minSup)
     freqItems = []
     mineTree(a,c,minSup,set([]),freqItems)
@@ -146,13 +153,3 @@ while True:
                 print(index+1)
     else:
         print('\n搜尋的字串並不符合Frequent Pattern之條件')
-
-
-
-
-
-
-
-
-
-
