@@ -39,16 +39,13 @@ def readfile(filetype):
         for i in file_list:    
             if file_list.index(i) % 10 == a:
                 c = get_imlist(i)
-                print(i)
                 for i in range(len(c)):
                     img = Image.open(c[i])
                     img_ndarray=np.asarray(img,dtype='float64')/255
                     data[d] = np.ndarray.flatten(img_ndarray)
                     data_label[d] = a
                     d = d + 1
-                    print(d)
         a = a + 1
-        print(a)
     
     return data,data_label
         
@@ -56,14 +53,14 @@ def readfile(filetype):
 train_feature,train_label = readfile('image')  
 test_feature,test_label = readfile('test_image')  
 
-train_feature_reshape = train_feature.reshape(-1, 784, 1)
-test_feature_reshape = test_feature.reshape(-1, 784, 1)
+train_feature_reshape = train_feature.reshape(-1, 28, 28)
+test_feature_reshape = test_feature.reshape(-1, 28, 28)
 
 train_label_onehot = np_utils.to_categorical(train_label)
 test_label_onehot = np_utils.to_categorical(test_label)
 
 model = Sequential()
-model.add(SimpleRNN(units=256, input_shape=(784, 1), unroll = True))
+model.add(GRU(units=256, input_shape=(28, 28), unroll = True))
 model.add(Dropout(0.1))
 model.add(Dense(units=10, activation='softmax', kernel_initializer = 'normal'))
 model.summary()
